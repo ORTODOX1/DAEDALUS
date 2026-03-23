@@ -6,3 +6,5 @@ __pycache__/
 .env
 *.onnx
 !python/openecuforge/ml/models/.gitkeep
+node_modules/
+*.pdf

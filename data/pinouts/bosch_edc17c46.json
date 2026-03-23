@@ -1,0 +1,30 @@
+{
+  "ecu": "EDC17C46",
+  "manufacturer": "Bosch",
+  "vehicles": ["MAN TGA", "MAN TGX", "MAN TGS"],
+  "processor": "TC1797",
+  "protocol": "BDM",
+  "hw_revisions": {
+    "HW03": {
+      "test_pads": [
+        { "id": "TP1", "signal": "VCC", "voltage": 3.3, "x": 45, "y": 120, "description": "Processor core power supply 3.3V" },
+        { "id": "TP2", "signal": "GND", "voltage": 0.0, "x": 47, "y": 125, "description": "Digital ground" },
+        { "id": "TP3", "signal": "TCK", "voltage": 0.0, "x": 50, "y": 118, "description": "Test clock — BDM clock input" },
+        { "id": "TP4", "signal": "TDI", "voltage": 0.0, "x": 52, "y": 115, "description": "Test data in — data to processor" },
+        { "id": "TP5", "signal": "TDO", "voltage": 0.0, "x": 54, "y": 113, "description": "Test data out — data from processor" },
+        { "id": "TP6", "signal": "TMS", "voltage": 0.0, "x": 48, "y": 110, "description": "Test mode select" },
+        { "id": "TP7", "signal": "RESET", "voltage": 3.3, "x": 43, "y": 122, "description": "Processor reset — active low, pull-up to VCC" }
+      ],
+      "connections": [
+        { "from": "TP1", "to_chip_pin": 203, "signal": "VCC3.3" },
+        { "from": "TP2", "to_chip_pin": 204, "signal": "VSS" },
+        { "from": "TP3", "to_chip_pin": 234, "signal": "TCK" },
+        { "from": "TP4", "to_chip_pin": 235, "signal": "TDI" },
+        { "from": "TP5", "to_chip_pin": 236, "signal": "TDO" },
+        { "from": "TP6", "to_chip_pin": 237, "signal": "TMS" },
+        { "from": "TP7", "to_chip_pin": 10, "signal": "PORST" }
+      ],
+      "notes": "Standard Bosch EDC17 BDM layout. Test pads near TC1797 in L-shape cluster. Apply 3.3V to TP1 for standalone operation."
+    }
+  }
+}

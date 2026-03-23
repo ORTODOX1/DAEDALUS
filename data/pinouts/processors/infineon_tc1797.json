@@ -1,0 +1,25 @@
+{
+  "processor": "TC1797",
+  "manufacturer": "Infineon",
+  "architecture": "TriCore 1.3.1",
+  "debug_interface": "BDM (OCDS Level 1)",
+  "package": "PG-BGA-416",
+  "vcc_core": 1.3,
+  "vcc_io": 3.3,
+  "max_vcc_io": 3.63,
+  "debug_pins": {
+    "TCK": { "pin": 234, "direction": "input", "description": "OCDS clock input" },
+    "TDI": { "pin": 235, "direction": "input", "description": "OCDS data input (to device)" },
+    "TDO": { "pin": 236, "direction": "output", "description": "OCDS data output (from device)" },
+    "TMS": { "pin": 237, "direction": "input", "description": "OCDS mode select" },
+    "PORST": { "pin": 10, "direction": "input", "description": "Power-on reset, active low" },
+    "TRST": { "pin": 238, "direction": "input", "description": "Test reset, optional" },
+    "BRKOUT": { "pin": 239, "direction": "output", "description": "Breakpoint output" }
+  },
+  "flash_memory": {
+    "pflash0": { "start": "0x80000000", "size": "2 MB", "type": "Program Flash" },
+    "pflash1": { "start": "0x80200000", "size": "2 MB", "type": "Program Flash" },
+    "dflash0": { "start": "0xAF000000", "size": "96 KB", "type": "Data Flash" }
+  },
+  "notes": "Used in Bosch EDC17, Cummins CM2350. BDM requires 3.3V VCC on I/O pins. NEVER apply 5V — will damage permanently. TCK max frequency: 16 MHz."
+}

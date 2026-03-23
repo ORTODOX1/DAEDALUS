@@ -1,8 +1,17 @@
-//! Application state management
-use std::sync::Arc;
-use tokio::sync::RwLock;
+use std::sync::Mutex;
 
 pub struct AppState {
-    // pub connection: Arc<RwLock<Option<Connection>>>,
-    // pub project: Arc<RwLock<Option<Project>>>,
+    pub connected: Mutex<bool>,
+    pub ecu_type: Mutex<Option<String>>,
+    pub multimeter_port: Mutex<Option<String>>,
+}
+
+impl Default for AppState {
+    fn default() -> Self {
+        Self {
+            connected: Mutex::new(false),
+            ecu_type: Mutex::new(None),
+            multimeter_port: Mutex::new(None),
+        }
+    }
 }

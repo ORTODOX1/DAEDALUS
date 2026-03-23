@@ -1,0 +1,26 @@
+{
+  "ecu": "CM2350",
+  "manufacturer": "Cummins",
+  "vehicles": ["КамАЗ", "PACCAR", "Kenworth", "Peterbilt"],
+  "processor": "TC1797",
+  "protocol": "BDM",
+  "hw_revisions": {
+    "A": {
+      "test_pads": [
+        { "id": "TP1", "signal": "VCC", "voltage": 3.3, "x": 30, "y": 85, "description": "Core VCC 3.3V" },
+        { "id": "TP2", "signal": "GND", "voltage": 0.0, "x": 32, "y": 90, "description": "Ground" },
+        { "id": "TP3", "signal": "TCK", "voltage": 0.0, "x": 35, "y": 82, "description": "BDM clock" },
+        { "id": "TP4", "signal": "TDI", "voltage": 0.0, "x": 37, "y": 80, "description": "Data in" },
+        { "id": "TP5", "signal": "TDO", "voltage": 0.0, "x": 39, "y": 78, "description": "Data out" },
+        { "id": "TP6", "signal": "TMS", "voltage": 0.0, "x": 33, "y": 77, "description": "Mode select" },
+        { "id": "TP7", "signal": "RESET", "voltage": 3.3, "x": 28, "y": 87, "description": "Reset — active low" }
+      ],
+      "connections": [
+        { "from": "TP3", "to_chip_pin": 234, "signal": "TCK" },
+        { "from": "TP4", "to_chip_pin": 235, "signal": "TDI" },
+        { "from": "TP5", "to_chip_pin": 236, "signal": "TDO" }
+      ],
+      "notes": "Cummins CM2350 uses same TC1797 as Bosch EDC17. BDM pinout is similar but pad placement differs. Check board revision marking on PCB edge."
+    }
+  }
+}
