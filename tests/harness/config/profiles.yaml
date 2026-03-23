@@ -1,0 +1,227 @@
+# Daedalus — Configuration Profiles
+# ==========================================
+# Copy the profile you need to config.yaml in your project root
+# Or set environment variable: OPENECUFORGE_PROFILE=local|cloud
+
+# ═══════════════════════════════════════════════════════════════
+# PROFILE 1: LOCAL-FIRST (мощный ноутбук с GPU)
+# ═══════════════════════════════════════════════════════════════
+# Всё работает офлайн. API — только как fallback для сложных задач.
+# Требования: 8+ ГБ VRAM, 16+ ГБ RAM, SSD
+# ═══════════════════════════════════════════════════════════════
+
+local:
+  mode: "local-first"
+  
+  # ── Локальные ML-модели ──
+  local_ml:
+    enabled: true
+    
+    # ONNX-модель для поиска карт в бинарниках
+    map_finder:
+      enabled: true
+      model_path: "models/map_finder_v1.onnx"
+      device: "cuda"          # cuda | cpu | directml
+      batch_size: 32          # больше = быстрее, больше VRAM
+      # ~1 ГБ VRAM, анализ 2 МБ за 1-3 сек
+    
+    # Локальный LLM через Ollama
+    ollama:
+      enabled: true
+      endpoint: "http://localhost:11434"
+      
+      # Модели по задачам (от маленькой к большой)
+      models:
+        # Быстрая классификация карт — маленькая модель
+        map_classifier: "phi3:3.8b-mini-4k-instruct-q4_K_M"  # ~2.5 ГБ VRAM
+        
+        # Объяснение DTC, общие вопросы — средняя модель
+        general: "llama3.2:8b-instruct-q4_K_M"                # ~5 ГБ VRAM
+        
+        # Глубокий анализ, сложные вопросы — большая модель
+        expert: "llama3.1:70b-instruct-q4_K_M"                # ~40 ГБ VRAM (!)
+        # ↑ Только если хватает памяти. Иначе fallback на API.
+      
+      # Таймаут генерации (секунды)
+      timeout: 120
+      
+      # Контекстное окно
+      num_ctx: 8192
+
+  # ── Облачные API (fallback) ──
+  cloud_api:
+    enabled: true             # true = доступен как запасной вариант
+    primary: "claude"         # Какой API использовать первым при fallback
+    
+    providers:
+      claude:
+        enabled: true
+        api_key_env: "ANTHROPIC_API_KEY"   # Из переменной окружения
+        model: "claude-sonnet-4-20250514"
+        max_tokens: 4096
+        # Использовать ТОЛЬКО для:
+        use_for:
+          - "complex_chat"        # Сложные вопросы про тюнинг
+          - "expert_analysis"     # Когда локальная модель не уверена (confidence < 0.7)
+          - "safety_review"       # Финальная проверка перед записью (опционально)
+      
+      openai:
+        enabled: false
+        api_key_env: "OPENAI_API_KEY"
+        model: "gpt-4o"
+      
+      gemini:
+        enabled: false
+        api_key_env: "GOOGLE_API_KEY"
+        model: "gemini-2.0-flash"
+  
+  # ── Логика выбора: локально или API ──
+  routing:
+    # Классификация карт
+    map_classification:
+      primary: "ollama/map_classifier"     # Сначала локально
+      fallback: "claude"                    # Если confidence < threshold
+      confidence_threshold: 0.7             # Ниже — спрашиваем API
+    
+    # Объяснение DTC
+    dtc_explanation:
+      primary: "ollama/general"
+      fallback: "claude"
+    
+    # Поиск карт в бинарнике
+    map_finding:
+      primary: "local_ml/map_finder"       # Всегда локально (ONNX)
+      fallback: "none"                      # Нет смысла слать бинарник в API
+    
+    # Safety проверка
+    safety_check:
+      primary: "hardcoded_rules"            # Жёсткие правила ВСЕГДА локально
+      secondary: "ollama/general"           # Дополнительный LLM ревью
+      fallback: "claude"                    # Опциональная проверка через API
+    
+    # Чат-ассистент
+    chat:
+      primary: "ollama/general"            # Простые вопросы — локально
+      fallback: "claude"                    # Сложные — через API
+      # Эвристика: если в вопросе >3 технических термина → API
+    
+    # Checksum коррекция
+    checksum:
+      primary: "hardcoded"                 # ТОЛЬКО локально, ВСЕГДА
+      fallback: "none"                      # Никогда не через API
+  
+  # ── Статистика использования ──
+  stats:
+    track_api_calls: true
+    track_local_inference: true
+    show_in_statusbar: true    # "Local: 247 | API: 3"
+
+
+# ═══════════════════════════════════════════════════════════════
+# PROFILE 2: CLOUD-FIRST (слабый ноутбук без GPU / тестирование)
+# ═══════════════════════════════════════════════════════════════
+# Минимальные вычисления на ноутбуке. Всё AI через API.
+# Требования: 8+ ГБ RAM, интернет, API ключ
+# ═══════════════════════════════════════════════════════════════
+
+cloud:
+  mode: "cloud-first"
+  
+  # ── Локальные ML-модели ──
+  local_ml:
+    enabled: false            # Отключены полностью
+    
+    map_finder:
+      enabled: false
+      # Вместо ONNX используем эвристику на CPU:
+      # Энтропия + монотонные последовательности + размерности
+      # Медленнее (10-30 сек), но работает без GPU
+    
+    ollama:
+      enabled: false
+  
+  # ── Облачные API (основной режим) ──
+  cloud_api:
+    enabled: true
+    primary: "claude"
+    
+    providers:
+      claude:
+        enabled: true
+        api_key_env: "ANTHROPIC_API_KEY"
+        model: "claude-sonnet-4-20250514"
+        max_tokens: 4096
+        use_for:
+          - "map_classification"
+          - "dtc_explanation"
+          - "map_finding_hints"
+          - "safety_review"
+          - "complex_chat"
+          - "general_chat"
+      
+      openai:
+        enabled: true
+        api_key_env: "OPENAI_API_KEY"
+        model: "gpt-4o"
+        use_for:
+          - "map_classification"   # Параллельный запрос для сравнения
+      
+      gemini:
+        enabled: true
+        api_key_env: "GOOGLE_API_KEY"
+        model: "gemini-2.0-flash"
+        use_for:
+          - "dtc_explanation"      # Быстрый и дешёвый для простых задач
+  
+  # ── Логика маршрутизации ──
+  routing:
+    map_classification:
+      primary: "claude"
+      fallback: "openai"
+    
+    dtc_explanation:
+      primary: "gemini"           # Дешёвый для простых задач
+      fallback: "claude"
+    
+    map_finding:
+      primary: "cpu_heuristic"    # Локальная эвристика без GPU
+      fallback: "claude"          # Подсказки от API
+    
+    safety_check:
+      primary: "hardcoded_rules"  # ВСЕГДА локально
+      secondary: "claude"
+      fallback: "openai"
+    
+    chat:
+      primary: "claude"
+      fallback: "openai"
+    
+    checksum:
+      primary: "hardcoded"
+      fallback: "none"
+  
+  # ── Оптимизация API-запросов ──
+  optimization:
+    # Кеширование ответов
+    cache:
+      enabled: true
+      ttl_hours: 720            # 30 дней — карты не меняются
+      max_size_mb: 100
+      # Классификация карты RPM×Load 16×16 = одинаковая для всех MED17
+    
+    # Батчинг: группируем запросы
+    batching:
+      enabled: true
+      max_batch_size: 10        # До 10 карт в одном запросе
+      delay_ms: 500             # Ждём 500мс собирая запросы
+    
+    # Приоритеты: сначала дешёвые модели
+    cost_priority:
+      - "gemini"                # Самый дешёвый
+      - "claude"                # Средний
+      - "openai"                # Самый дорогой
+
+  stats:
+    track_api_calls: true
+    track_costs: true           # Считаем расход по API
+    show_in_statusbar: true     # "API calls: 47 | Cost: ~$0.12"

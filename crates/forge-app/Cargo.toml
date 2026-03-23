@@ -1,0 +1,28 @@
+[package]
+name = "forge-app"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+tokio.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+anyhow.workspace = true
+forge-core = { path = "../forge-core" }
+forge-hal = { path = "../forge-hal" }
+forge-proto = { path = "../forge-proto" }
+forge-flash = { path = "../forge-flash" }
+forge-binary = { path = "../forge-binary" }
+forge-dtc = { path = "../forge-dtc" }
+forge-live = { path = "../forge-live" }
+forge-ai = { path = "../forge-ai" }
+
+[dependencies.tauri]
+version = "2"
+features = []
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }

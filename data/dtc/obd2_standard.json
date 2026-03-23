@@ -1,0 +1,18 @@
+{
+  "_comment": "Standard OBD2 DTC database — populate from SAE J2012",
+  "P0420": {
+    "description": "Catalyst System Efficiency Below Threshold (Bank 1)",
+    "category": "emissions",
+    "severity": "moderate"
+  },
+  "P0401": {
+    "description": "Exhaust Gas Recirculation Flow Insufficient",
+    "category": "emissions", 
+    "severity": "moderate"
+  },
+  "P2463": {
+    "description": "Diesel Particulate Filter - Soot Accumulation",
+    "category": "emissions",
+    "severity": "high"
+  }
+}
